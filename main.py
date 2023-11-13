@@ -137,7 +137,7 @@ def calculate_refraction_angle(incidence_degrees, n1, n2):
     incidence_radians = math.radians(incidence_degrees)
     
     # Use Snell's Law to find the sine of the refraction angle
-    sin_refraction_angle = math.sin(incidence_radians) * n1 / n2
+    sin_refraction_angle = math.sin(incidence_radians) / n1 / n2
     
     # Check for total internal reflection
     if abs(sin_refraction_angle) > 1:
@@ -209,10 +209,10 @@ def line_a(alpha, radius):
     x = 0.5 - radius * np.sin(np.deg2rad(alpha))
     y = 0.5 + radius * np.cos(np.deg2rad(alpha))
     
-    return [-0.5, x], [y, y]
+    return [-5, x], [y, y]
 
 
-def line_b(alpha, radius):
+def line_b(alpha, radius, n_1, n_2):
     xa, ya = line_a(alpha, radius)
     x_intersect_a, y_intersect_a = xa[-1], ya[-1]
     
@@ -232,13 +232,16 @@ def line_b(alpha, radius):
 
     incidence_degrees = angle_between_vectors(vn_positive, da)
 
-    refraction_radians = calculate_refraction_angle(incidence_degrees, n_air, n_water)
+
+    refraction_radians = calculate_refraction_angle(incidence_degrees, n_1, n_2)
     refraction_degrees = math.degrees(refraction_radians)
+    
+    print("alpha",  incidence_degrees)
+    
+    print("beta",  refraction_degrees)
 
     (B_x, B_y) = calculate_point_b(x_intersect_a, y_intersect_a, refraction_degrees, vn_positive)
 
-    # Plot the refracted ray
-    plt.plot([x_intersect_a, B_x], [y_intersect_a, B_y], 'r-', label='Refracted ray')
 
     return [x_intersect_a, B_x], [y_intersect_a, B_y]
 
@@ -268,7 +271,7 @@ def line_c(xb, yb):
     return [x_intersect_b, B_x], [y_intersect_b, B_y]
 
 
-def line_d(xc, yc):
+def line_d(xc, yc, n1, n2):
     # Assuming we already have the end point of line c which is the intersection point
     x_intersect_c, y_intersect_c = xc[1], yc[1]
 
@@ -285,55 +288,170 @@ def line_d(xc, yc):
 
     incidence_degrees = angle_between_vectors(vn_positive, dc)
 
-    refraction_radians = calculate_refraction_angle(incidence_degrees, n_water, n_air)
+    refraction_radians = calculate_refraction_angle(incidence_degrees, n1, n2)
     
     refraction_degrees = math.degrees(refraction_radians)
     
-    (x_end, y_end) = calculate_refracted_ray((x_intersect_c, y_intersect_c,), vn, dc, n_water, n_air)
+    (x_end, y_end) = calculate_refracted_ray((x_intersect_c, y_intersect_c,), vn, dc, n1, n2)
+
+    x_end_extended = x_intersect_c + (x_end - x_intersect_c) * 1500
+    y_end_extended = y_intersect_c + (y_end - y_intersect_c) * 1500
     
-    return [x_intersect_c, x_end], [y_intersect_c, y_end]
+    # return [x_intersect_c, x_end], [y_intersect_c, y_end]
+    return [x_intersect_c, x_end_extended], [y_intersect_c, y_end_extended]
 
 
 def plot_rays_final(alpha_slider_value, radius):
     alpha = 90 - alpha_slider_value
     # alpha = alpha_slider_value
 
-    plt.figure(figsize=(8,8))
-    circle = plt.Circle((center_x, center_y), radius, color='b', fill=False)
-    plt.gca().add_patch(circle)
+    # plt.figure(figsize=(8,8))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 7))
 
-    plt.plot([center_x - radius, center_x + radius], [center_y, center_y], 'k:', label='Equator')
+    # circle = plt.Circle((center_x, center_y), radius, color='b', fill=False)
+    # ax1.add_patch(circle)
+
+    circle = plt.Circle((center_x, center_y), radius, color='b', fill=False)
+    ax2.add_patch(circle)
+
+    # ax1.plot([center_x - radius, center_x + radius], [center_y, center_y], 'k:', label='Equator')
+    ax2.plot([center_x - radius, center_x + radius], [center_y, center_y], 'k:', label='Equator')
     
     # Line a
     xa, ya = line_a(alpha, radius)
-    plt.plot(xa, ya, 'g-', label='Incoming ray')
+    # ax1.plot(xa, ya, 'gold', label='Incoming ray')
+    ax2.plot(xa, ya, 'gold', label='Incoming ray')
 
     
-    # Line b
-    xb, yb = line_b(alpha, radius)
-    # plt.plot(xb, yb, 'r-', label='Refracted ray')
+    # Line Red (~650 nm): ~1.331
+    xbr, ybr = line_b(alpha, radius, n_air, 1.31)
+    # ax1.plot(xbr, ybr, 'red')
+    ax2.plot(xbr, ybr, 'red')
+    # Line Orange (~590 nm): ~1.332
+    # xbo, ybo = line_b(alpha, radius, n_air, 1.32)
+    # # ax1.plot(xbo, ybo, 'orange')
+    # ax2.plot(xbo, ybo, 'orange')
+    # # Line Yellow (~570 nm): ~1.333
+    # xby, yby = line_b(alpha, radius, n_air, 1.33)
+    # # ax1.plot(xby, yby, 'yellow')
+    # ax2.plot(xby, yby, 'yellow')
+    # # Line Green (~510 nm): ~1.334
+    # xbg, ybg = line_b(alpha, radius, n_air, 1.35)
+    # # ax1.plot(xbg, ybg, 'green')
+    # ax2.plot(xbg, ybg, 'green')
+    # # Line Blue (~475 nm): ~1.335
+    # xbb, ybb = line_b(alpha, radius, n_air, 1.38)
+    # # ax1.plot(xbb, ybb, 'blue')
+    # ax2.plot(xbb, ybb, 'blue')
+    # Line Violet (~400 nm): ~1.337
+    xbv, ybv = line_b(alpha, radius, n_air, 1.42)
+    # ax1.plot(xbv, ybv, 'violet')
+    ax2.plot(xbv, ybv, 'violet')
 
-    # Line c
-    xc, yc = line_c(xb, yb)
-    plt.plot(xc, yc, 'b-', label='Internally reflected ray')
 
-    # Line d
-    xd, yd = line_d(xc, yc)
-    plt.plot(xd, yd, 'y-', label='Outgoing ray')
+    # Line c Red
+    xcr, ycr = line_c(xbr, ybr)
+    # ax1.plot(xcr, ycr, 'red', label='Internally reflected ray')
+    ax2.plot(xcr, ycr, 'red', label='Internally reflected ray')
+    # Line c Orange
+    # xco, yco = line_c(xbo, ybo)
+    # # ax1.plot(xco, yco, 'orange')
+    # ax2.plot(xco, yco, 'orange')
+    # # Line c Yellow
+    # xcy, ycy = line_c(xby, yby)
+    # # ax1.plot(xcy, ycy, 'yellow')
+    # ax2.plot(xcy, ycy, 'yellow')
+    # # Line c Green
+    # xcg, ycg = line_c(xbg, ybg)
+    # # ax1.plot(xcg, ycg, 'green')
+    # ax2.plot(xcg, ycg, 'green')
+    # # Line c Blue
+    # xcb, ycb = line_c(xbb, ybb)
+    # # ax1.plot(xcb, ycb, 'blue')
+    # ax2.plot(xcb, ycb, 'blue')
+    # # Line c Violet
+    xcv, ycv = line_c(xbv, ybv)
+    # ax1.plot(xcv, ycv, 'violet')
+    ax2.plot(xcv, ycv, 'violet')
+
+    #### Line d Red
+    xdr, ydr = line_d(xcr, ycr, 1.31, n_air)
+    ax1.plot(xdr, ydr, 'red', linewidth=2.5, alpha=0.7, label='Outgoing ray')
+    ax2.plot(xdr, ydr, 'red', label='Outgoing ray')
+    # Line d orange
+    # xdo, ydo = line_d(xco, yco, 1.32, n_air)
+    # ax1.plot(xdo, ydo, 'orange', linewidth=2.5, alpha=0.7)
+    # ax2.plot(xdo, ydo, 'orange')
+    # # Line d Yellow
+    # xdy, ydy = line_d(xcy, ycy, 1.33, n_air)
+    # ax1.plot(xdy, ydy, 'yellow', linewidth=2.5, alpha=0.7)
+    # ax2.plot(xdy, ydy, 'yellow')
+    # # Line d Green
+    # xdg, ydg = line_d(xcg, ycg, 1.35, n_air)
+    # ax1.plot(xdg, ydg, 'green', linewidth=2.5, alpha=0.7)
+    # ax2.plot(xdg, ydg, 'green')
+    # # Line d Blue
+    # xdb, ydb = line_d(xcb, ycb, 1.38, n_air)
+    # ax1.plot(xdb, ydb, 'blue', linewidth=2.5, alpha=0.7)
+    # ax2.plot(xdb, ydb, 'blue')
+    # Line d Violet
+    xdv, ydv = line_d(xcv, ycv, 1.42, n_air)
+    ax1.plot(xdv, ydv, 'violet', linewidth=2.5, alpha=0.7)
+    ax2.plot(xdv, ydv, 'violet')
 
     # Uncomment to plot tangent lines
-    # plot_tangent_line_at_point((xa[-1], ya[-1]))
-    # plot_tangent_line_at_point((xb[-1], yb[-1]))
-    # plot_tangent_line_at_point((xc[-1], yc[-1]))
+    plot_tangent_line_at_point((xa[-1], ya[-1]))
+    plot_tangent_line_at_point((xbr[-1], ybr[-1]))
+    plot_tangent_line_at_point((xcr[-1], ycr[-1]))
+    plot_tangent_line_at_point((xbv[-1], ybv[-1]))
+    plot_tangent_line_at_point((xcv[-1], ycv[-1]))
+
+    #Colors refraction in water:
+    # Red (~650 nm): ~1.331
+    # Orange (~590 nm): ~1.332
+    # Yellow (~570 nm): ~1.333
+    # Green (~510 nm): ~1.335
+    # Blue (~475 nm): ~1.338
+    # Violet (~400 nm): ~1.342
     
-    
-    plt.xlim(-0.5, 1.5)
-    plt.ylim(-0.5, 1.5)
-    plt.gca().set_aspect('equal', adjustable='box')
-    plt.legend()
+    # plt.xlim(-20, 1.5)
+    # plt.ylim(-20, 1.5)
+    # plt.gca().set_aspect('equal', adjustable='box')
+    # # plt.legend()
+    # plt.show()
+
+    ax1.set_xlim(-1500, 2)
+    ax1.set_ylim(-1000, 2)
+    ax1.set_title("Full View")
+
+    # Set zoom levels based on widget values
+    ax2.set_xlim(-0.5, 1.5)
+    ax2.set_ylim(-0.5, 1.5)
+    ax2.set_title("Zoomed View")
+
     plt.show()
 
+    # # Plot the entire process in plt
+    # # ... (your plotting code here for plt)
+    # ax1.set_title("Full Rainbow Formation")
+    # ax1.set_xlim(-50, 1.5)  # Set these to focus on a specific area
+    # ax1.set_ylim(-50, 1.5)
+
+    # # Plot a zoomed-in view of the light exiting the droplet in ax2
+    # ax2.set_xlim(-1.5, 1.5)  # Set these to focus on a specific area
+    # ax2.set_ylim(-1.5, 1.5)
+    # ax2.set_title("Zoomed-In on Light Exit")
+
+    # plt.gca().set_aspect('equal', adjustable='box')
+    # plt.show()
 
 
-widgets.interactive(plot_rays_final, alpha_slider_value=widgets.FloatSlider(value=45, min=0, max=80, step=1, description='Angle:'), radius=widgets.FloatSlider(value=0.4, min=0.1, max=1.0, step=0.01, description='Radius:'))
+# widgets.interactive(plot_rays_final, alpha_slider_value=widgets.FloatSlider(value=45, min=0, max=80, step=1, description='Angle:'), radius=widgets.FloatSlider(value=0.4, min=0.1, max=1.0, step=0.01, description='Radius:'))
+# Define your existing sliders
+alpha_slider = widgets.FloatSlider(value=45, min=0, max=66.5, step=1, description='Angle:')
+radius_slider = widgets.FloatSlider(value=0.4, min=0.1, max=1.0, step=0.01, description='Radius:')
 
+# Create the interactive widget
+widgets.interactive(plot_rays_final, 
+                    alpha_slider_value=alpha_slider, 
+                    radius=radius_slider)
