@@ -257,7 +257,7 @@ def line_d(xc, yc, n1, n2):
     x_intersect_c, y_intersect_c = xc[1], yc[1]
 
     vn = calculate_normal_vector(x_intersect_c, y_intersect_c)
-    vn_positive = tuple(abs(x) for x in vn)
+    # vn_positive = tuple(abs(x) for x in vn)
 
     extended_x_C = x_intersect_c + vn[0] * factor
     extended_y_C = y_intersect_c + vn[1] * factor
@@ -267,16 +267,19 @@ def line_d(xc, yc, n1, n2):
     #line c vector:
     dc = (xc[1] - xc[0], yc[1] - yc[0])
 
-    incidence_degrees = angle_between_vectors(vn_positive, dc)
+    incidence_degrees = angle_between_vectors(vn, dc)
 
     refraction_radians = calculate_refraction_angle(incidence_degrees, n1, n2)
     
     refraction_degrees = math.degrees(refraction_radians)
 
+    # print("incidence_degrees D", incidence_degrees)
+    # print("refraction_degrees D", refraction_degrees)
+
     normal_vector_notnormalized = sp.Matrix([x_intersect_c - center_x, y_intersect_c - center_y])
 
-    # if normal_vector_notnormalized[0] > 0:
-    #     normal_vector_notnormalized[0] = -normal_vector_notnormalized[0]
+    if normal_vector_notnormalized[0] > 0:
+        normal_vector_notnormalized[0] = -normal_vector_notnormalized[0]
     
     refracted_vector = calculate_refracted_ray(dc, refraction_degrees, normal_vector_notnormalized, True)
 
@@ -317,24 +320,24 @@ def plot_rays_final(alpha_slider_value, radius):
     
     # Line Red (~650 nm): ~1.331
     xbr, ybr = line_b(alpha, radius, n_air, 1.333)
-    # ax1.plot(xbr, ybr, 'red')
     ax2.plot(xbr, ybr, 'red')
+
     # Line Orange (~590 nm): ~1.332
-    # xbo, ybo = line_b(alpha, radius, n_air, 1.32)
-    # # ax1.plot(xbo, ybo, 'orange')
-    # ax2.plot(xbo, ybo, 'orange')
-    # # Line Yellow (~570 nm): ~1.333
-    # xby, yby = line_b(alpha, radius, n_air, 1.33)
-    # # ax1.plot(xby, yby, 'yellow')
-    # ax2.plot(xby, yby, 'yellow')
+    xbo, ybo = line_b(alpha, radius, n_air, 1.32)
+    ax2.plot(xbo, ybo, 'orange')
+
+    # Line Yellow (~570 nm): ~1.333
+    xby, yby = line_b(alpha, radius, n_air, 1.33)
+    ax2.plot(xby, yby, 'yellow')
+
     # # Line Green (~510 nm): ~1.334
-    # xbg, ybg = line_b(alpha, radius, n_air, 1.35)
-    # # ax1.plot(xbg, ybg, 'green')
-    # ax2.plot(xbg, ybg, 'green')
+    xbg, ybg = line_b(alpha, radius, n_air, 1.35)
+    ax2.plot(xbg, ybg, 'green')
+
     # # Line Blue (~475 nm): ~1.335
-    # xbb, ybb = line_b(alpha, radius, n_air, 1.38)
-    # # ax1.plot(xbb, ybb, 'blue')
-    # ax2.plot(xbb, ybb, 'blue')
+    xbb, ybb = line_b(alpha, radius, n_air, 1.38)
+    ax2.plot(xbb, ybb, 'blue')
+
     # Line Violet (~400 nm): ~1.337
     xbv, ybv = line_b(alpha, radius, n_air, 1.42)
     # ax1.plot(xbv, ybv, 'violet')
@@ -369,7 +372,7 @@ def plot_rays_final(alpha_slider_value, radius):
     ############################################################################### make a for loop that creates light rays at different alphas so that we see the build up
 
     ### Line d Red
-    xdr, ydr = line_d(xcr, ycr, 1.31, n_air)
+    xdr, ydr = line_d(xcr, ycr, 1.333, n_air)
     ax1.plot(xdr, ydr, 'red', linewidth=2.5, alpha=0.7, label='Outgoing ray')
     ax2.plot(xdr, ydr, 'red', label='Outgoing ray')
     # Line d orange
@@ -389,9 +392,9 @@ def plot_rays_final(alpha_slider_value, radius):
     # ax1.plot(xdb, ydb, 'blue', linewidth=2.5, alpha=0.7)
     # ax2.plot(xdb, ydb, 'blue')
     # Line d Violet
-    xdv, ydv = line_d(xcv, ycv, 1.42, n_air)
-    ax1.plot(xdv, ydv, 'violet', linewidth=2.5, alpha=0.7)
-    ax2.plot(xdv, ydv, 'violet')
+    # xdv, ydv = line_d(xcv, ycv, 1.42, n_air)
+    # ax1.plot(xdv, ydv, 'violet', linewidth=2.5, alpha=0.7)
+    # ax2.plot(xdv, ydv, 'violet')
 
     # Uncomment to plot tangent lines
     # plot_tangent_line_at_point((xa[-1], ya[-1]))
@@ -441,7 +444,7 @@ def plot_rays_final(alpha_slider_value, radius):
 
 
 # Define your existing sliders
-alpha_slider = widgets.FloatSlider(value=45, min=0, max=66.5, step=1, description='Angle:')
+alpha_slider = widgets.FloatSlider(value=45, min=0, max=60, step=1, description='Angle:')
 radius_slider = widgets.FloatSlider(value=0.4, min=0.1, max=1.0, step=0.01, description='Radius:')
 
 # Create the interactive widget
