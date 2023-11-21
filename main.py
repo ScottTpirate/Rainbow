@@ -3,12 +3,13 @@ import matplotlib.pyplot as plt
 import ipywidgets as widgets
 import math
 import sympy as sp
+from sympy import Matrix, solve, Eq
 
 center_x = 0.5  
 center_y = 0.5
 
 # Air has an index of refraction of about 1.0, and water about 1.33
-n_air = 1.0
+n_air = 1.000293
 n_water = 1.33
 
 factor = 0.5
@@ -38,73 +39,32 @@ def reflect_line_of_equal_length(incoming_vector, incidence_point, start_point):
     return reflected_line_end_point
 
 
-def calculate_refracted_ray(incidence_point, normal_vector, incoming_vector, n1, n2):
+def calculate_refracted_ray(incoming_vector, angle_of_refraction, normal_vector_notnormalized, clockwise=False):
     # Normalize vectors
-    normal_vector = sp.Matrix(normal_vector).normalized()
-    incoming_vector = sp.Matrix(incoming_vector).normalized()
-    
-    # Calculate the angle of incidence using the dot product
-    angle_of_incidence = sp.acos(incoming_vector.dot(normal_vector))
-    
-    # Apply Snell's Law to find the sine of the angle of refraction
-    sin_angle_of_refraction = n1 / n2 * sp.sin(angle_of_incidence)
-    
-    # Check for total internal reflection
-    if abs(sin_angle_of_refraction) > 1:
-        raise ValueError("Total internal reflection: the angle of refraction cannot be computed.")
-    
-    # Calculate the actual angle of refraction
-    angle_of_refraction = sp.asin(sin_angle_of_refraction)
+    normal_vector_normalized = sp.Matrix(normal_vector_notnormalized).normalized()
+    incoming_vector = sp.Matrix(incoming_vector).normalized()  
+
+    # Convert angle to radians for computation
+    angle_radians = sp.rad(angle_of_refraction)
     
     # Determine the direction of the cross product
-    cross_product = normal_vector[0] * incoming_vector[1] - normal_vector[1] * incoming_vector[0]
+    cross_product = normal_vector_normalized[0] * incoming_vector[1] - normal_vector_normalized[1] * incoming_vector[0]
     
     # If the cross product is negative, the incoming vector is on the left side of the normal and we need to rotate clockwise
     # If it's positive, the incoming vector is on the right side and we need to rotate counterclockwise
-    if cross_product < 0:
-        rotation_matrix = sp.Matrix([[sp.cos(angle_of_refraction), sp.sin(angle_of_refraction)],
-                                     [-sp.sin(angle_of_refraction), sp.cos(angle_of_refraction)]])
+    if not clockwise:
+        # Counter-Clockwise
+        rotation_matrix = sp.Matrix([[sp.cos(angle_radians), -sp.sin(angle_radians)],
+                                     [sp.sin(angle_radians), sp.cos(angle_radians)]])
     else:
-        rotation_matrix = sp.Matrix([[sp.cos(-angle_of_refraction), sp.sin(-angle_of_refraction)],
-                                     [-sp.sin(-angle_of_refraction), sp.cos(-angle_of_refraction)]])
+        # Clockwise
+        rotation_matrix = sp.Matrix([[sp.cos(angle_radians), sp.sin(angle_radians)],
+                                     [-sp.sin(angle_radians), sp.cos(angle_radians)]])
     
     # Calculate the refracted ray vector
-    refracted_vector = rotation_matrix * normal_vector
+    refracted_vector = rotation_matrix * normal_vector_notnormalized
     
-    # Assuming the refracted ray should have the same length as the incoming vector
-    length_of_incoming_ray = sp.Matrix(incoming_vector).norm()
-    refracted_ray_end_point = sp.Matrix(incidence_point) + refracted_vector * length_of_incoming_ray
-    
-    return refracted_ray_end_point.evalf()
-
-
-def calculate_point_b(a_x, a_y, angle_a, normal_vector):
-    # Convert angle to radians for computation
-    angle_a_radians = sp.rad(angle_a)
-    
-    # Calculate the vector from center to A
-    vector_ca = sp.Matrix([a_x - center_x, a_y - center_y])
-    
-    # Normalize the normal vector
-    normal_vector_normalized = sp.Matrix(normal_vector).normalized()
-    
-    # Rotate the vector CA by the angle at A to get the vector CB
-    rotation_matrix = sp.Matrix([[sp.cos(angle_a_radians), -sp.sin(angle_a_radians)],
-                                 [sp.sin(angle_a_radians), sp.cos(angle_a_radians)]])
-    vector_cb = rotation_matrix * vector_ca
-    
-    # Since the triangle is isosceles and angles at A and B are equal, the lengths |CA| and |CB| are equal
-    # We use the normal vector to determine the direction from the center to B
-    direction_to_b = sp.sign((vector_cb.T * normal_vector_normalized)[0])
-    
-    # Compute the coordinates of B by translating the center by the vector CB
-    b_x = center_x + direction_to_b * vector_cb[0]
-    b_y = center_y - direction_to_b * vector_cb[1]
-
-    evaluated_b_x = b_x.evalf()
-    evaluated_b_y = b_y.evalf()
-    
-    return (evaluated_b_x, evaluated_b_y)
+    return refracted_vector
 
 
 def plot_tangent_line_at_point(incidence_point, line_length=.3):
@@ -137,14 +97,7 @@ def calculate_refraction_angle(incidence_degrees, n1, n2):
     incidence_radians = math.radians(incidence_degrees)
     
     # Use Snell's Law to find the sine of the refraction angle
-    sin_refraction_angle = math.sin(incidence_radians) / n1 / n2
-    
-    # Check for total internal reflection
-    if abs(sin_refraction_angle) > 1:
-        raise ValueError("Total internal reflection occurs, no refraction possible.")
-    
-    # Find the refraction angle in radians using the arcsine function
-    refraction_radians = math.asin(sin_refraction_angle)
+    refraction_radians = math.asin(n1 * math.sin(incidence_radians) / n2)
     
     # Return the refraction angle in radians
     return refraction_radians
@@ -166,6 +119,7 @@ def calculate_normal_vector(intersect_x, intersect_y):
     # Calculate the vector from the center of the circle to the intersection point
     normal_dx = intersect_x - center_x
     normal_dy = intersect_y - center_y
+
 
     # Normalize the vector
     magnitude = math.sqrt(normal_dx**2 + normal_dy**2)
@@ -232,18 +186,45 @@ def line_b(alpha, radius, n_1, n_2):
 
     incidence_degrees = angle_between_vectors(vn_positive, da)
 
-
+    # calculate the refraction angle given the angle between A vector and Normal vector.
     refraction_radians = calculate_refraction_angle(incidence_degrees, n_1, n_2)
     refraction_degrees = math.degrees(refraction_radians)
+
+    # Calculate the vector from center to A
+    normal_vector_notnormalized = sp.Matrix([x_intersect_a - center_x, y_intersect_a - center_y])
+
+    refracted_vector = calculate_refracted_ray(da, refraction_degrees, normal_vector_notnormalized)
+ 
+    # declare symbols for sympy
+    x, y, t = sp.symbols('x y t')
+
+    # Parametric equation for the line (refracted ray)
+    line_B_x = x_intersect_a + refracted_vector[0] * t
+    line_B_y = y_intersect_a + refracted_vector[1] * t
+
+    # Equation of the circle
+    circle_eq = (x - center_x)**2 + (y - center_y)**2 - radius**2
+
+    # Substitute the line equation into the circle equation
+    intersection_eq = circle_eq.subs({x: line_B_x, y: line_B_y})
+
+    # Solve for t
+    solutions_t = sp.solve(intersection_eq, t)
+
+
+    # Assuming you have already solved for t and filtered real solutions
+    solutions_t_numeric = [sol.evalf() for sol in solutions_t if sol.is_real]
+
+    # Calculate both intersection points
+    intersection_points = [(line_B_x.subs(t, sol), line_B_y.subs(t, sol)) for sol in solutions_t_numeric]
+
+    rightmost_intersection = max(intersection_points, key=lambda p: p[0].evalf())
+    x_end, y_end = rightmost_intersection
+    x_end, y_end = x_end.evalf(), y_end.evalf()
     
-    print("alpha",  incidence_degrees)
-    
-    print("beta",  refraction_degrees)
+    # print("beta",  refraction_degrees)
 
-    (B_x, B_y) = calculate_point_b(x_intersect_a, y_intersect_a, refraction_degrees, vn_positive)
-
-
-    return [x_intersect_a, B_x], [y_intersect_a, B_y]
+    return [x_intersect_a, x_end], [y_intersect_a, y_end]
 
 
 def line_c(xb, yb):
@@ -291,8 +272,19 @@ def line_d(xc, yc, n1, n2):
     refraction_radians = calculate_refraction_angle(incidence_degrees, n1, n2)
     
     refraction_degrees = math.degrees(refraction_radians)
+
+    normal_vector_notnormalized = sp.Matrix([x_intersect_c - center_x, y_intersect_c - center_y])
+
+    # if normal_vector_notnormalized[0] > 0:
+    #     normal_vector_notnormalized[0] = -normal_vector_notnormalized[0]
     
-    (x_end, y_end) = calculate_refracted_ray((x_intersect_c, y_intersect_c,), vn, dc, n1, n2)
+    refracted_vector = calculate_refracted_ray(dc, refraction_degrees, normal_vector_notnormalized, True)
+
+    # Assuming the refracted ray should have the same length as the incoming vector
+    length_of_incoming_ray = sp.Matrix(dc).norm()
+    refracted_ray_end_point = sp.Matrix((x_intersect_c, y_intersect_c)) + refracted_vector * length_of_incoming_ray
+
+    (x_end, y_end) = refracted_ray_end_point.evalf()
 
     x_end_extended = x_intersect_c + (x_end - x_intersect_c) * 1500
     y_end_extended = y_intersect_c + (y_end - y_intersect_c) * 1500
@@ -324,7 +316,7 @@ def plot_rays_final(alpha_slider_value, radius):
 
     
     # Line Red (~650 nm): ~1.331
-    xbr, ybr = line_b(alpha, radius, n_air, 1.31)
+    xbr, ybr = line_b(alpha, radius, n_air, 1.333)
     # ax1.plot(xbr, ybr, 'red')
     ax2.plot(xbr, ybr, 'red')
     # Line Orange (~590 nm): ~1.332
@@ -374,7 +366,9 @@ def plot_rays_final(alpha_slider_value, radius):
     # ax1.plot(xcv, ycv, 'violet')
     ax2.plot(xcv, ycv, 'violet')
 
-    #### Line d Red
+    ############################################################################### make a for loop that creates light rays at different alphas so that we see the build up
+
+    ### Line d Red
     xdr, ydr = line_d(xcr, ycr, 1.31, n_air)
     ax1.plot(xdr, ydr, 'red', linewidth=2.5, alpha=0.7, label='Outgoing ray')
     ax2.plot(xdr, ydr, 'red', label='Outgoing ray')
@@ -400,11 +394,11 @@ def plot_rays_final(alpha_slider_value, radius):
     ax2.plot(xdv, ydv, 'violet')
 
     # Uncomment to plot tangent lines
-    plot_tangent_line_at_point((xa[-1], ya[-1]))
-    plot_tangent_line_at_point((xbr[-1], ybr[-1]))
-    plot_tangent_line_at_point((xcr[-1], ycr[-1]))
-    plot_tangent_line_at_point((xbv[-1], ybv[-1]))
-    plot_tangent_line_at_point((xcv[-1], ycv[-1]))
+    # plot_tangent_line_at_point((xa[-1], ya[-1]))
+    # plot_tangent_line_at_point((xbr[-1], ybr[-1]))
+    # plot_tangent_line_at_point((xcr[-1], ycr[-1]))
+    # plot_tangent_line_at_point((xbv[-1], ybv[-1]))
+    # plot_tangent_line_at_point((xcv[-1], ycv[-1]))
 
     #Colors refraction in water:
     # Red (~650 nm): ~1.331
@@ -446,7 +440,6 @@ def plot_rays_final(alpha_slider_value, radius):
     # plt.show()
 
 
-# widgets.interactive(plot_rays_final, alpha_slider_value=widgets.FloatSlider(value=45, min=0, max=80, step=1, description='Angle:'), radius=widgets.FloatSlider(value=0.4, min=0.1, max=1.0, step=0.01, description='Radius:'))
 # Define your existing sliders
 alpha_slider = widgets.FloatSlider(value=45, min=0, max=66.5, step=1, description='Angle:')
 radius_slider = widgets.FloatSlider(value=0.4, min=0.1, max=1.0, step=0.01, description='Radius:')
