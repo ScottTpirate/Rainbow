@@ -20,7 +20,7 @@ maxYValue = 1.25  # Replace with the actual max value of Y from your data
 # with open('Rainbow/exaggerated_rainbow_data.json') as f:
 #     data = json.load(f)
 
-with open('Rainbow/rainbow_data.json') as f:
+with open('rainbow_data.json') as f:
     data = json.load(f)
 
 @app.route('/')
