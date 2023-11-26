@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Light Ray Visualization</title>
+  </head>
+  <body>
+    <input type="range" id="alphaSlider" min="1" max="60" value="1" />
+    <div id="visualization"></div>
+
+    <!-- Include D3.js library -->
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+
+    <script>
+      const minXValue = -10; // Replace with the minimum x-value from your data
+      const maxXValue = 10; // Replace with the maximum x-value from your data
+      const minYValue = -10; // Replace with the minimum y-value from your data
+      const maxYValue = 10; // Replace with the maximum y-value from your data
+      // Define scales outside the functions so they are accessible in both initializeVisualization and updateVisualization
+      // Define the dimensions of the SVG canvas at the top of your script
+      const width = 800;
+      const height = 400;
+
+      const xScale = d3
+        .scaleLinear()
+        .domain([minXValue, maxXValue])
+        .range([0, width]);
+      const yScale = d3
+        .scaleLinear()
+        .domain([minYValue, maxYValue])
+        .range([height, 0]);
+
+      var data;
+
+      fetch("exaggerated_rainbow_data.json")
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then((json) => {
+          data = json;
+          console.log(json); // Check if data is loaded
+          initializeVisualization(); // Initialize the visualization
+        })
+        .catch((e) => {
+          console.log(e); // Log any errors during fetch
+        });
+
+      var slider = document.getElementById("alphaSlider");
+      slider.addEventListener("input", function () {
+        updateVisualization(this.value);
+      });
+
+      //   function updateVisualization(alpha) {
+      //     var alphaData = data["alpha_" + alpha];
+      //     var svg = d3.select("#visualization").select("svg");
+      //     svg.selectAll("*").remove(); // Clear previous drawings
+
+      //     var xScale = svg.xScale;
+      //     var yScale = svg.yScale;
+
+      //     Object.keys(alphaData).forEach((color) => {
+      //       var lineData = alphaData[color];
+
+      //       // Function to create line segments
+      //       function createLineSegment(x1, y1, x2, y2) {
+      //         return d3.line()([
+      //           [xScale(x1), yScale(y1)],
+      //           [xScale(x2), yScale(y2)],
+      //         ]);
+      //       }
+
+      //       // Loop through each set of coordinates and create line segments
+      //       ["xa", "xb", "xc", "xd"].forEach((xKey, index) => {
+      //         var yKey = ["ya", "yb", "yc", "yd"][index];
+      //         for (let i = 0; i < lineData[xKey].length - 1; i++) {
+      //           svg
+      //             .append("path")
+      //             .datum(
+      //               createLineSegment(
+      //                 lineData[xKey][i],
+      //                 lineData[yKey][i],
+      //                 lineData[xKey][i + 1],
+      //                 lineData[yKey][i + 1]
+      //               )
+      //             )
+      //             .attr("fill", "none")
+      //             .attr("stroke", color)
+      //             .attr("stroke-width", 2)
+      //             .attr("d", (d) => d);
+      //         }
+      //       });
+      //     });
+      //   }
+      function updateVisualization(alpha) {
+        var alphaData = data["alpha_" + alpha];
+        var svg = d3.select("#visualization").select("svg");
+        svg.selectAll("*").remove(); // Clear previous drawings
+
+        Object.keys(alphaData).forEach((color) => {
+          var lineData = alphaData[color];
+
+          // Draw starting point of each line segment as a circle
+          svg
+            .append("circle")
+            .attr("cx", xScale(lineData.xa[0]))
+            .attr("cy", yScale(lineData.ya[0]))
+            .attr("r", 50) // radius of the circle
+            .attr("fill", color);
+
+          // Repeat for other points if needed
+          svg
+            .append("circle")
+            .attr("cx", xScale(lineData.xb[0]))
+            .attr("cy", yScale(lineData.yb[0]))
+            .attr("r", 50)
+            .attr("fill", color);
+
+          // ... Repeat for xc[0], yc[0], xd[0], yd[0]
+        });
+      }
+
+      function initializeVisualization() {
+        // Define the dimensions of the SVG
+        var width = 800;
+        var height = 400;
+
+        var svg = d3
+          .select("#visualization")
+          .append("svg")
+          .attr("width", width)
+          .attr("height", height);
+
+        // Create scales
+        var xScale = d3
+          .scaleLinear()
+          .domain([minXValue, maxXValue]) // Replace with your data's min and max X values
+          .range([0, width]);
+
+        var yScale = d3
+          .scaleLinear()
+          .domain([minYValue, maxYValue]) // Replace with your data's min and max Y values
+          .range([height, 0]); // Inverted to account for SVG's coordinate system
+
+        // Store scales for later use
+        svg.xScale = xScale;
+        svg.yScale = yScale;
+
+        updateVisualization(1);
+      }
+    </script>
+  </body>
+</html>

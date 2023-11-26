@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Light Ray Visualization</title>
+  </head>
+  <body>
+    <!-- Slider container -->
+    <div style="position: relative; width: 320px; margin: auto">
+      <!-- Left arrow button -->
+      <button
+        id="decrement"
+        style="
+          position: absolute;
+          left: 0;
+          top: 50%;
+          transform: translateY(-50%);
+        "
+      >
+        &lt;
+      </button>
+      <!-- Slider -->
+      <input
+        type="range"
+        id="alphaSlider"
+        min="1"
+        max="60"
+        value="1"
+        style="width: 260px; display: inline-block; margin: 0 30px"
+      />
+      <!-- Right arrow button -->
+      <button
+        id="increment"
+        style="
+          position: absolute;
+          right: 0;
+          top: 50%;
+          transform: translateY(-50%);
+        "
+      >
+        &gt;
+      </button>
+    </div>
+    <img id="plotImage" src="/plot/1" alt="Plot Image" />
+    <script>
+      var slider = document.getElementById("alphaSlider");
+      var decrementButton = document.getElementById("decrement");
+      var incrementButton = document.getElementById("increment");
+      var plotImage = document.getElementById("plotImage");
+
+      // Debounce function
+      function debounce(func, wait) {
+        let timeout;
+
+        return function executedFunction(...args) {
+          const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+          };
+
+          clearTimeout(timeout);
+          timeout = setTimeout(later, wait);
+        };
+      }
+
+      decrementButton.onclick = function () {
+        // Decrease the slider value by 1, or more if you want faster changes
+        slider.value = Math.max(slider.min, parseInt(slider.value) - 1);
+        updateVisualization(slider.value);
+      };
+
+      incrementButton.onclick = function () {
+        // Increase the slider value by 1, or more if you want faster changes
+        slider.value = Math.min(slider.max, parseInt(slider.value) + 1);
+        updateVisualization(slider.value);
+      };
+
+      // Update visualization function
+      function updateVisualization(alpha) {
+        plotImage.src = "/plot/" + alpha;
+      }
+
+      // Debounced version of updateVisualization
+      var debouncedUpdateVisualization = debounce(updateVisualization, 250);
+
+      // Event listener using the debounced function
+      slider.addEventListener("input", function () {
+        debouncedUpdateVisualization(this.value);
+      });
+    </script>
+  </body>
+</html>

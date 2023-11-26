@@ -166,8 +166,8 @@ def line_a(alpha, radius):
     return [-5, x], [y, y]
 
 
-def line_b(alpha, radius, n_1, n_2):
-    xa, ya = line_a(alpha, radius)
+def line_b(radius, n_1, n_2, xa, ya):
+
     x_intersect_a, y_intersect_a = xa[-1], ya[-1]
     
     vn = calculate_normal_vector(x_intersect_a, y_intersect_a)
@@ -319,27 +319,27 @@ def plot_rays_final(alpha_slider_value, radius):
 
     
     # Line Red (~650 nm): ~1.331
-    xbr, ybr = line_b(alpha, radius, n_air, 1.333)
+    xbr, ybr = line_b(radius, n_air, 1.333, xa, ya)
     ax2.plot(xbr, ybr, 'red')
 
     # Line Orange (~590 nm): ~1.332
-    xbo, ybo = line_b(alpha, radius, n_air, 1.32)
+    xbo, ybo = line_b(radius, n_air, 1.32, xa, ya)
     ax2.plot(xbo, ybo, 'orange')
 
     # Line Yellow (~570 nm): ~1.333
-    xby, yby = line_b(alpha, radius, n_air, 1.33)
+    xby, yby = line_b(radius, n_air, 1.33, xa, ya)
     ax2.plot(xby, yby, 'yellow')
 
     # # Line Green (~510 nm): ~1.334
-    xbg, ybg = line_b(alpha, radius, n_air, 1.35)
+    xbg, ybg = line_b(radius, n_air, 1.35, xa, ya)
     ax2.plot(xbg, ybg, 'green')
 
     # # Line Blue (~475 nm): ~1.335
-    xbb, ybb = line_b(alpha, radius, n_air, 1.38)
+    xbb, ybb = line_b(radius, n_air, 1.38, xa, ya)
     ax2.plot(xbb, ybb, 'blue')
 
     # Line Violet (~400 nm): ~1.337
-    xbv, ybv = line_b(alpha, radius, n_air, 1.42)
+    xbv, ybv = line_b(radius, n_air, 1.42, xa, ya)
     # ax1.plot(xbv, ybv, 'violet')
     ax2.plot(xbv, ybv, 'violet')
 
@@ -443,11 +443,11 @@ def plot_rays_final(alpha_slider_value, radius):
     # plt.show()
 
 
-# Define your existing sliders
-alpha_slider = widgets.FloatSlider(value=45, min=0, max=60, step=1, description='Angle:')
-radius_slider = widgets.FloatSlider(value=0.4, min=0.1, max=1.0, step=0.01, description='Radius:')
+# # Define your existing sliders
+# alpha_slider = widgets.FloatSlider(value=45, min=0, max=60, step=1, description='Angle:')
+# radius_slider = widgets.FloatSlider(value=0.4, min=0.1, max=1.0, step=0.01, description='Radius:')
 
-# Create the interactive widget
-widgets.interactive(plot_rays_final, 
-                    alpha_slider_value=alpha_slider, 
-                    radius=radius_slider)
+# # Create the interactive widget
+# widgets.interactive(plot_rays_final, 
+#                     alpha_slider_value=alpha_slider, 
+#                     radius=radius_slider)
