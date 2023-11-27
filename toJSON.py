@@ -1,7 +1,10 @@
 import json
-from . import main
+import main
 import numpy as np
 import sympy
+
+
+
 
 class EnhancedJSONEncoder(json.JSONEncoder):
     def default(self, o):
@@ -24,26 +27,27 @@ class EnhancedJSONEncoder(json.JSONEncoder):
 
 # Parameters
 radius = 0.5 # your radius value
-# refractive_indices = {
-#     'red': 1.31,
-#     'orange': 1.32,
-#     'yellow': 1.33,
-#     'green': 1.35,
-#     'blue': 1.38,
-#     'violet': 1.42
-# }
 refractive_indices = {
-    'red': 1.331,
-    'orange': 1.332,
-    'yellow': 1.333,
-    'green': 1.335,
-    'blue': 1.338,
-    'violet': 1.342
+    'red': 1.31,
+    'orange': 1.32,
+    'yellow': 1.33,
+    'green': 1.35,
+    'blue': 1.38,
+    'violet': 1.42
 }
+# refractive_indices = {
+#     'red': 1.331,
+#     'orange': 1.332,
+#     'yellow': 1.333,
+#     'green': 1.335,
+#     'blue': 1.338,
+#     'violet': 1.342
+# }
 
 data = {}
 
-for alpha in range(1, 61):  # Looping from 1 to 60
+# for alpha in range(1, 61):  # Looping from 1 to 60
+for alpha in np.arange(1, 61, 0.1):  # Looping from 1 to 60
     data_entry = {}
     alpha_idk = 90 - alpha
     print("alpha_idk:",alpha_idk)
@@ -68,5 +72,5 @@ for alpha in range(1, 61):  # Looping from 1 to 60
 
 
 # Writing data to a JSON file
-with open('Rainbow/rainbow_data.json', 'w') as file:
+with open('exaggerated_rainbow_data_SMALL.json', 'w') as file:
     json.dump(data, file, cls=EnhancedJSONEncoder)

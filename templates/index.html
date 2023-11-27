@@ -2,43 +2,65 @@
 <html>
   <head>
     <title>Light Ray Visualization</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   </head>
   <body>
-    <!-- Slider container -->
-    <div style="position: relative; width: 320px; margin: auto">
-      <!-- Left arrow button -->
-      <button
-        id="decrement"
-        style="
-          position: absolute;
-          left: 0;
-          top: 50%;
-          transform: translateY(-50%);
-        "
+    <div class="container">
+      <!-- Container for Radio Buttons -->
+      <div class="radio-buttons">
+        <!-- Radio Buttons for Plot Selection -->
+        <input type="radio" id="plot1" name="plotType" value="plot1" checked />
+        <label for="plot1">Single Ray Small</label><br />
+
+        <input type="radio" id="plot2" name="plotType" value="plot2" />
+        <label for="plot2">Single Ray Exaggerated</label><br />
+
+        <input type="radio" id="plot3" name="plotType" value="plot3" />
+        <label for="plot3">All Rays Exaggerated</label><br />
+
+        <input type="radio" id="plot4" name="plotType" value="plot4" />
+        <label for="plot4">All Rays Small</label><br />
+      </div>
+
+      <!-- Container for the Plot Image -->
+      <div
+        style="position: relative; width: 320px; margin: auto"
+        class="plot-container"
       >
-        &lt;
-      </button>
-      <!-- Slider -->
-      <input
-        type="range"
-        id="alphaSlider"
-        min="1"
-        max="60"
-        value="1"
-        style="width: 260px; display: inline-block; margin: 0 30px"
-      />
-      <!-- Right arrow button -->
-      <button
-        id="increment"
-        style="
-          position: absolute;
-          right: 0;
-          top: 50%;
-          transform: translateY(-50%);
-        "
-      >
-        &gt;
-      </button>
+        <!-- Left arrow button -->
+        <button
+          id="decrement"
+          style="
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+          "
+        >
+          &lt;
+        </button>
+        <!-- Slider -->
+        <input
+          type="range"
+          id="alphaSlider"
+          min="1"
+          max="60"
+          value="40"
+          style="width: 260px; display: inline-block; margin: 0 30px"
+        />
+        <!-- Right arrow button -->
+        <button
+          id="increment"
+          style="
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+          "
+        >
+          &gt;
+        </button>
+      </div>
     </div>
     <img id="plotImage" src="/plot/1" alt="Plot Image" />
     <script>
@@ -74,11 +96,6 @@
         updateVisualization(slider.value);
       };
 
-      // Update visualization function
-      function updateVisualization(alpha) {
-        plotImage.src = "/plot/" + alpha;
-      }
-
       // Debounced version of updateVisualization
       var debouncedUpdateVisualization = debounce(updateVisualization, 250);
 
@@ -86,6 +103,35 @@
       slider.addEventListener("input", function () {
         debouncedUpdateVisualization(this.value);
       });
+
+      window.addEventListener('load', function() {
+          // Call the update function with the default value
+          updateVisualization(slider.value);
+      });
+
+      // Function to get the selected plot type
+      function getSelectedPlotType() {
+        var radios = document.getElementsByName("plotType");
+        for (var radio of radios) {
+          if (radio.checked) {
+            return radio.value;
+          }
+        }
+      }
+
+      // Update the updateVisualization function
+      function updateVisualization(alpha) {
+        var plotType = getSelectedPlotType();
+        plotImage.src = `/plot/${plotType}/${alpha}`;
+      }
+
+      // Add event listeners for radio buttons
+      var radios = document.getElementsByName("plotType");
+      for (var radio of radios) {
+        radio.addEventListener("change", function () {
+          debouncedUpdateVisualization(slider.value);
+        });
+      }
     </script>
   </body>
 </html>

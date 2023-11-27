@@ -1,0 +1,14 @@
+.container {
+    display: flex;
+    align-items: center; /* Aligns children vertically center */
+    justify-content: center; /* Aligns children horizontally center */
+}
+
+.radio-buttons {
+    margin-right: 20px; /* Optional: Adjust spacing between radio buttons and plot */
+}
+
+
+/* .plot-container {
+    
+} */

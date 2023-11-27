@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import ipywidgets as widgets
+# import ipywidgets as widgets
 import math
 import sympy as sp
 from sympy import Matrix, solve, Eq
@@ -13,7 +13,6 @@ n_air = 1.000293
 n_water = 1.33
 
 factor = 0.5
-
 
 
 def reflect_line_of_equal_length(incoming_vector, incidence_point, start_point):
