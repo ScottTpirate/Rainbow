@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import io
 import json
+import os
 import traceback
 
 
@@ -91,5 +92,5 @@ def create_plot_from_json(alpha):
 
     return fig
 
-if __name__ == '__main__':
-    app.run(debug=True)
+port = int(os.environ.get("PORT", 5000))
+app.run(host='0.0.0.0', port=port)
