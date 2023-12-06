@@ -2,7 +2,7 @@ from flask import Flask, render_template, send_file, jsonify
 import matplotlib
 matplotlib.use('Agg')  # Use this backend before importing pyplot
 from mpl_toolkits.mplot3d import Axes3D
-
+import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import io
@@ -73,13 +73,26 @@ def create_plot_from_json_iter(alpha):
     alpha_data = data4[alpha_key]
 
     # Create a Matplotlib figure and axis
-    fig, ax = plt.subplots(figsize=(10, 8))
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    # fig, ax = plt.subplots(figsize=(10, 8))
 
     # Create a circle patch
-    circle = patches.Circle((0.5, 0.5), 0.5, color='b', fill=False)
+    # circle = patches.Circle((0.5, 0.5), 0.5, color='b', fill=False)
 
     # Add the circle to the plot
-    ax.add_patch(circle)
+    # ax.add_patch(circle)
+    # Circle parameters
+    radius = 0.5
+    center_x, center_y, center_z = 0.5, 0.5, 0  # Assuming you want the circle at z=0
+    theta = np.linspace(0, 2*np.pi, 100)
+
+    # Circle in 3D
+    x = center_x + radius * np.cos(theta)
+    y = center_y + radius * np.sin(theta)
+    z = center_z + np.zeros_like(theta)  # Circle is in the XY plane, so z is constant
+
+    ax.plot3D(x, y, z, color='b')
 
     # Set the aspect of the plot to be equal
     ax.set_aspect('equal')
