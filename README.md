@@ -1,7 +1,11 @@
-<img src="fun_rainbow_graphic.png" width="100" height="100">
+<p align="center">
+    <img src="fun_rainbow_graphic.png" width="200" height="200">
+</p>
 
-# Rainbow Visualization Tool
-Somewhere Within the Rainbow
+<h1 align="center">Rainbow Visualization Tool</h1>
+<h3 align="center">Somewhere Within the Rainbow</h3>
+
+
 
 ## Introduction
 This project presents an interactive tool to visualize and understand the mechanics of a rainbow, specifically focusing on how light refracts, reflects, and refracts again to create this natural phenomenon. The tool leverages several datasets to provide a dynamic and interactive plotting experience.
