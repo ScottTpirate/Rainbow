@@ -45,7 +45,7 @@ Janke, S. (1999). Somewhere Within the Rainbow (UMAP). Consortium for Mathematic
 ## How to Run
 To run this tool locally in a Jupyter Notebook:
 1. Set up you Jupyter enviroment to meet your needs. Ensure you have Python and the necessary libraries installed.
-2. Copy `Main_notebook.ipynb` 
+2. Copy `main_notebook.ipynb` 
 3. Run all of the cells and the interactive plot should show up at the bottom. (this method calculates "live" so it will be slow, be patient)
 
 
