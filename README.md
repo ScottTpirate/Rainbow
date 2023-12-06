@@ -43,11 +43,23 @@ Janke, S. (1999). Somewhere Within the Rainbow (UMAP). Consortium for Mathematic
 
 
 ## How to Run
-To run this tool locally:
+To run this tool locally in a Jupyter Notebook:
+1. Set up you Jupyter enviroment to meet your needs. Ensure you have Python and the necessary libraries installed.
+2. Copy `Main_notebook.ipynb` 
+3. Run all of the cells and the interactive plot should show up at the bottom. (this method calculates "live" so it will be slow, be patient)
+
+
+To run this tool locally in the browser:
 1. Ensure you have Python and the necessary libraries installed.
 2. Clone this repository to your local machine.
 3. Navigate to the cloned directory and run `python app.py` in your terminal.
 4. Open your web browser and go to `http://localhost:5000`.
+
+
+To pre-render your own data for browser runs:
+1. Ensure you have Python and the necessary libraries installed.
+2. Clone this repository to your local machine.
+3. Navigate to the cloned directory and run edit `toJSON.py` to meet your sepecific needs. (Currently set up to output vector data from `main.py`)
 
 ---
 
