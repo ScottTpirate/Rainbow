@@ -63,3 +63,6 @@ To pre-render your own data for browser runs:
 
 ---
 
+
+https://medium.com/@kilgore.scott/revisiting-the-rainbow-an-interactive-overview-40d7dabdec32
+
