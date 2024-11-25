@@ -63,6 +63,11 @@ To pre-render your own data for browser runs:
 
 ---
 
+Other resources I appreciate:
+https://javalab.org/en/rainbow_by_raindrops_en/
+https://ux1.eiu.edu/~cfadd/3050/Adventures/chapter_17/ch17_3.htm
+http://hyperphysics.phy-astr.gsu.edu/hbase/atmos/rbowpath.html
+http://hyperphysics.phy-astr.gsu.edu/hbase/atmos/rbowpath.html#c2
 
 https://medium.com/@kilgore.scott/revisiting-the-rainbow-an-interactive-overview-40d7dabdec32
 
