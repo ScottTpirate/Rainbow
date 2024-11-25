@@ -1,0 +1,11 @@
+{
+    "sqltools.useNodeRuntime": true,
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "name": "rainbow",
+            "database": "${workspaceFolder:Rainbow}/rainbow_data.db"
+        }
+    ]
+}

@@ -1,6 +1,8 @@
+# toJSON_3d.py
+
 import json
 import numpy as np
-import calculate  # Updated calculate.py with 3D functions
+import calculate  # Ensure calculate.py is updated with 3D functions
 
 # Custom JSON encoder to handle NumPy data types
 class EnhancedJSONEncoder(json.JSONEncoder):
@@ -15,25 +17,27 @@ class EnhancedJSONEncoder(json.JSONEncoder):
             return super().default(o)
 
 # Parameters
-radius = 1.0  # Should match the radius used in calculate.py
-cylinder_radius = 0.5  # Adjust for the size of the incoming cylinder
+radius = 1.0  # Sphere radius
+cylinder_radii = np.arange(0.1, 1.1, 0.1)  # Cylinder radii from 0.1 to 1.0
 num_rays = 100  # Adjust for resolution
 n_air = calculate.n_air
 refractive_indices = calculate.refractive_indices
 sphere_center = np.array([0.0, 0.0, 0.0])
 
-data = {}
-
 # Define ranges for Sun's azimuth and elevation angles
-azimuth_angles = np.arange(0, 361, 30)   # 0° to 360° in 30° increments
+azimuth_angles = np.arange(0, 361, 30)    # 0° to 360° in 30° increments
 elevation_angles = np.arange(-90, 91, 30)  # -90° to 90° in 30° increments
 
-# Loop over azimuth and elevation angles to simulate different Sun positions
+# Loop over azimuth angles
 for theta_value in azimuth_angles:
+    print(f"Processing θ={theta_value}°")
+    data = {}  # Initialize data for this azimuth angle
+
+    # Loop over elevation angles
     for phi_value in elevation_angles:
-        print(f"Processing θ={theta_value}°, φ={phi_value}°")
+        print(f"  Processing φ={phi_value}°")
         data_entry = {}
-        data_entry["rays"] = []
+        data_entry["rays"] = {}
 
         # Convert angles to radians
         theta_rad = np.radians(theta_value)
@@ -60,34 +64,46 @@ for theta_value in azimuth_angles:
 
         V1, V2 = compute_perpendicular_vectors(D)
 
-        # Generate rays on the surface of a cylinder
-        theta_values = np.linspace(0, 2 * np.pi, num_rays, endpoint=False)
-        ray_origins = []
-        r = cylinder_radius
-        for theta in theta_values:
-            offset = r * np.cos(theta) * V1 + r * np.sin(theta) * V2
-            P0 = sphere_center - D * 5.0  # Start rays before the sphere
-            origin = P0 + offset
-            ray_origins.append(origin)
+        # Loop over cylinder radii
+        for cylinder_radius in cylinder_radii:
+            print(f"    Processing Cylinder Radius: {cylinder_radius}")
+            rays_list = []
 
-        # Collect rays
-        rays = calculate.calculate_rays_cylinder(ray_origins, D, refractive_indices, radius)
+            # Generate rays on the surface of a cylinder
+            theta_values_ray = np.linspace(0, 2 * np.pi, num_rays, endpoint=False)
+            ray_origins = []
+            r = cylinder_radius
+            for theta in theta_values_ray:
+                offset = r * np.cos(theta) * V1 + r * np.sin(theta) * V2
+                P0 = sphere_center - D * 5.0  # Start rays before the sphere
+                origin = P0 + offset
+                ray_origins.append(origin)
 
-        for ray in rays:
-            color = ray['color']
-            path = ray['path']
-            ray_entry = {
-                "color": color,
-                "path": path
-            }
-            data_entry["rays"].append(ray_entry)
+            # Collect rays
+            rays = calculate.calculate_rays_cylinder(ray_origins, D, refractive_indices, radius)
 
-        # Store data for the current Sun position
-        key = f"theta_{theta_value}_phi_{phi_value}"
-        data[key] = data_entry
+            for ray in rays:
+                color = ray['color']
+                path = ray['path']
+                ray_entry = {
+                    "color": color,
+                    "path": path  # path is a dict with segments and points
+                }
+                rays_list.append(ray_entry)
 
-# Writing data to a JSON file
-with open('rainbow_data_3D.json', 'w') as file:
-    json.dump(data, file, cls=EnhancedJSONEncoder)
+            # Store rays for the current cylinder radius
+            cylinder_radius_key = f"radius_{cylinder_radius:.1f}"
+            data_entry["rays"][cylinder_radius_key] = rays_list
 
-print("Data generation complete.")
+        # Store data entry for the current elevation angle
+        phi_key = f"phi_{phi_value}"
+        data[phi_key] = data_entry
+
+    # Writing data to a JSON file for the current azimuth angle
+    filename = f'rainbow_data_theta_{theta_value}.json'
+    with open(filename, 'w') as file:
+        json.dump(data, file, cls=EnhancedJSONEncoder)
+
+    print(f"Data generation complete for θ={theta_value}°")
+
+print("All data generation complete.")
